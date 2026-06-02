@@ -60,4 +60,12 @@ def compute_matrix(cotation, restriction):
 
         results.append(row_result)
 
-    return pd.DataFrame(results)
+   
+    df = pd.DataFrame(results)
+    
+    df.index = df.index + 1
+    
+    df = df.rename(columns={"Poste": "index"})
+
+    return df
+
