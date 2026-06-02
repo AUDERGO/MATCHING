@@ -1,10 +1,13 @@
 import pandas as pd
-from src.matching import check_engin
 
 def build_debug_table(cotation, restriction):
 
     rows = []
 
+    # colonnes engin
+    engin_cols = ["engin_debout", "engin_retract", "engin_frontal"]
+
+    # colonnes communes
     common_cols = list(set(cotation.columns) & set(restriction.columns))
 
     for col in ["Poste", "Matricule"]:
@@ -17,36 +20,95 @@ def build_debug_table(cotation, restriction):
             poste = poste_row["Poste"]
             matricule = restr_row["Matricule"]
 
-            # --- ENGIN ---
-            engin_block = check_engin(poste_row, restr_row)
+            # ======================================================
+            # 🔎 1. LOGIQUE ENGIN (GLOBAL + DÉTAIL)
+            # ======================================================
 
+            # récupérer valeurs
+            poste_engins = {col: poste_row.get(col, 0) for col in engin_cols}
+            restr_engins = {col: restr_row.get(col, 0) for col in engin_cols}
+
+            engin_global = restr_row.get("Engin", 0)
+            limitation = restr_row.get("limitation_temps_conduite", 0)
+
+            poste_has_engin = any(v == 1 for v in poste_engins.values())
+
+            # appliquer logique métier
+            if poste_has_engin:
+
+                if engin_global == 1:
+                    engin_result = "BLOQUANT"
+                    engin_reason = "engin_global"
+
+                elif any(poste_engins[col] == 1 and restr_engins[col] >= 1 for col in engin_cols):
+                    engin_result = "BLOQUANT"
+                    engin_reason = "engin_specifique"
+
+                elif all(restr_engins[col] == 0 for col in engin_cols) and limitation == 1:
+                    engin_result = "OK"
+                    engin_reason = "limitation_temps"
+
+                else:
+                    engin_result = "OK"
+                    engin_reason = "ok"
+
+            else:
+                engin_result = "OK"
+                engin_reason = "poste_sans_engin"
+
+            # 👉 ligne globale ENGIN
             rows.append({
                 "Poste": poste,
                 "Matricule": matricule,
-                "Colonne": "ENGIN_GLOBAL",
-                "Poste_val": "voir colonnes engin",
-                "Restr_val": restr_row.get("Engin", 0),
-                "Resultat": "BLOQUANT" if engin_block else "OK"
+                "Type": "ENGIN_GLOBAL",
+                "Colonne": "ENGIN",
+                "Poste_val": poste_engins,
+                "Restr_val": f"global={engin_global}, detail={restr_engins}",
+                "Resultat": engin_result,
+                "Raison": engin_reason
             })
 
-            # --- AUTRES COLONNES ---
+            # 👉 détail ligne par ligne des engins
+            for col in engin_cols:
+                rows.append({
+                    "Poste": poste,
+                    "Matricule": matricule,
+                    "Type": "ENGIN_DETAIL",
+                    "Colonne": col,
+                    "Poste_val": poste_row.get(col, 0),
+                    "Restr_val": restr_row.get(col, 0),
+                    "Resultat": "INFO",
+                    "Raison": "detail_engin"
+                })
+
+            # ======================================================
+            # 🔎 2. AUTRES CONTRAINTES (STANDARD)
+            # ======================================================
+
             for col in common_cols:
 
-                poste_val = poste_row[col]
-                restr_val = restr_row[col]
-
-                if col.startswith("engin"):
+                # exclure colonnes engin déjà traitées
+                if col in engin_cols:
                     continue
+                if col == "Engin":
+                    continue
+                if col == "limitation_temps_conduite":
+                    continue
+
+                poste_val = poste_row.get(col, 0)
+                restr_val = restr_row.get(col, 0)
 
                 bloquant = (poste_val == 1 and restr_val >= 1)
 
                 rows.append({
                     "Poste": poste,
                     "Matricule": matricule,
+                    "Type": "STANDARD",
                     "Colonne": col,
                     "Poste_val": poste_val,
                     "Restr_val": restr_val,
-                    "Resultat": "BLOQUANT" if bloquant else "OK"
+                    "Resultat": "BLOQUANT" if bloquant else "OK",
+                    "Raison": "regle_standard"
                 })
 
     df = pd.DataFrame(rows)
