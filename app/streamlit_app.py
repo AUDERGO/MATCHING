@@ -28,13 +28,13 @@ if cotation_file and restriction_file:
         "matrice.csv"
     )
 
-debug_df = build_debug_table(cotation, restriction)
-st.write("### Détail complet (debug)")
-st.dataframe(debug_df)
+    debug_df = build_debug_table(cotation, restriction)
+    st.write("### Détail complet (debug)")
+    st.dataframe(debug_df)
 
-st.download_button(
-    "Télécharger détail",
-    debug_df.to_csv(index=False),
-    "debug_matching.csv",
-    "text/csv"
-)
+    st.download_button(
+        "Télécharger détail",
+        debug_df.to_csv(index=False),
+        "debug_matching.csv",
+        "text/csv"
+    )
