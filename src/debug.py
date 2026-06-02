@@ -37,8 +37,13 @@ def build_debug_table(cotation, restriction):
             if poste_has_engin:
 
                 if engin_global == 1:
-                    engin_result = "BLOQUANT"
-                    engin_reason = "engin_global"
+                    if limitation == 1 and all(restr_engins[col] == 0 for col in engin_cols):
+                        engin_result = "OK"
+                        engin_reason = "limitation_temps_ignore_engin"
+                    
+                    else:
+                        engin_result = "BLOQUANT"
+                        engin_reason = "engin_global"
 
                 elif any(poste_engins[col] == 1 and restr_engins[col] >= 1 for col in engin_cols):
                     engin_result = "BLOQUANT"
