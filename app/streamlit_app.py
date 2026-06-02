@@ -29,8 +29,19 @@ if cotation_file and restriction_file:
     )
 
     debug_df = build_debug_table(cotation, restriction)
-    st.write("### Détail complet (debug)")
-    st.dataframe(debug_df)
+    
+    st.write("### 🔎 Filtre type de règle")
+    type_filter = st.selectbox(
+        "Type",
+        ["ALL", "STANDARD", "ENGIN_GLOBAL", "ENGIN_DETAIL"]
+    )
+
+    if type_filter != "ALL":
+        display_df = debug_df[debug_df["Type"] == type_filter]
+    else:
+        display_df = debug_df
+
+    st.dataframe(display_df)
 
     st.download_button(
         "Télécharger détail",
