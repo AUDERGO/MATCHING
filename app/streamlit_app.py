@@ -29,23 +29,15 @@ if cotation_file and restriction_file:
     )
 
     debug_df = build_debug_table(cotation, restriction)
-    
-    st.write("### 🔎 Filtre type de règle")
-    type_filter = st.selectbox(
-        "Type",
-        ["ALL", "STANDARD", "ENGIN_GLOBAL", "ENGIN_DETAIL"]
-    )
 
-    if type_filter != "ALL":
-        display_df = debug_df[debug_df["Type"] == type_filter]
-    else:
-        display_df = debug_df
+    st.write("### 🔎 Détail complet (debug brut)")
+    st.dataframe(debug_df)
 
-    st.dataframe(display_df)
-
+    # ✅ téléchargement
     st.download_button(
-        "Télécharger détail",
+        "📥 Télécharger debug complet",
         debug_df.to_csv(index=False),
         "debug_matching.csv",
         "text/csv"
     )
+    
