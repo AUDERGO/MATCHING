@@ -45,8 +45,39 @@ def compute_matrix(cotation, restriction):
             score = 0
 
             # ENGIN
-            if check_engin(poste_row, restr_row):
-                score += 1
+            
+            def check_engin(poste_row, restr_row):
+
+                engin_cols = ["engin_debout", "engin_retract", "engin_frontal"]
+
+                poste_has_engin = any(poste_row[col] == 1 for col in engin_cols)
+
+                # si le poste n'utilise pas d'engin → OK direct
+                if not poste_has_engin:
+                    return False
+
+                engin_global = restr_row.get("Engin", 0)
+                limitation = restr_row.get("limitation_temps_conduite", 0)
+
+                restr_engins = {col: restr_row.get(col, 0) for col in engin_cols}
+
+                # ✅ CAS 1 : ENGIN GLOBAL = 1
+                if engin_global == 1:
+
+                    # ✅ CAS OK : limitation seule
+                    if limitation == 1 and all(restr_engins[col] == 0 for col in engin_cols):
+                        return False  # ✅ PAS BLOQUANT
+
+                    # ❌ sinon → BLOQUANT
+                    return True
+
+                # ✅ CAS 2 : restriction spécifique
+                for col in engin_cols:
+                    if poste_row[col] == 1 and restr_row[col] >= 1:
+                        return True
+
+                # ✅ CAS OK
+                return False
 
             for col in common_cols:
 
