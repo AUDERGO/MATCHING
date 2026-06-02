@@ -68,7 +68,9 @@ def build_debug_table(cotation, restriction):
                 "Type": "ENGIN_GLOBAL",
                 "Colonne": "ENGIN",
                 "Poste_val": poste_engins,
-                "Restr_val": f"global={engin_global}, detail={restr_engins}",
+                "Engin_global": engin_global,
+                "Limitation_conduite": limitation,
+                "Restr_detail": restr_engins,
                 "Resultat": engin_result,
                 "Raison": engin_reason
             })
