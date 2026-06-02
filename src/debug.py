@@ -83,7 +83,7 @@ def build_debug_table(cotation, restriction):
                     "Type": "ENGIN_DETAIL",
                     "Colonne": col,
                     "Poste_val": poste_row.get(col, 0),
-                    "Restr_val": restr_row.get(col, 0),
+                    "Restr_detail": restr_row.get(col, 0),
                     "Resultat": "INFO",
                     "Raison": "detail_engin"
                 })
@@ -113,9 +113,12 @@ def build_debug_table(cotation, restriction):
                     "Type": "STANDARD",
                     "Colonne": col,
                     "Poste_val": poste_val,
-                    "Restr_val": restr_val,
+                    "Engin_global": None,
+                    "Limitation_conduite": None,
+                    "Restr_detail": restr_val,
                     "Resultat": "BLOQUANT" if bloquant else "OK",
                     "Raison": "regle_standard"
+
                 })
 
     df = pd.DataFrame(rows)
