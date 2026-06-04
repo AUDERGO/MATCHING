@@ -56,19 +56,16 @@ def compute_matrix(cotation, restriction):
                 if not poste_has_engin:
                     return False
 
-                engin_global = restr_row.get("Engin", 0)
+                engin_global = max(
+                    restr_row.get("Engin", 0),
+                    restr_row.get("engin_tous", 0)
+                )
                 limitation = restr_row.get("limitation_temps_conduite", 0)
 
                 restr_engins = {col: restr_row.get(col, 0) for col in engin_cols}
 
-                # ✅ CAS 1 : ENGIN GLOBAL = 1
+               # ✅ CAS 1 : interdiction totale
                 if engin_global == 1:
-
-                    # ✅ CAS OK : limitation seule
-                    if limitation == 1 and all(restr_engins[col] == 0 for col in engin_cols):
-                        return False  # ✅ PAS BLOQUANT
-
-                    # ❌ sinon → BLOQUANT
                     return True
 
                 # ✅ CAS 2 : restriction spécifique
