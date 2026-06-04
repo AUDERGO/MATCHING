@@ -22,10 +22,20 @@ if cotation_file and restriction_file:
     st.write("### Matrice de matching")
     st.dataframe(result)
 
+    import io
+    
+    output = io.BytesIO()
+    
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        result.to_excel(writer, index=False)
+        
+    excel_data = output.getvalue()
+    
     st.download_button(
-        "Télécharger Excel",
-        result.to_csv(index=False),
-        "matrice.csv"
+        label="📥 Télécharger matrice Excel",
+        data=excel_data,
+        file_name="matrice_matching.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
     debug_df = build_debug_table(cotation, restriction)
@@ -33,11 +43,20 @@ if cotation_file and restriction_file:
     st.write("### 🔎 Détail complet (debug brut)")
     st.dataframe(debug_df)
 
-    # ✅ téléchargement
+    import io
+    
+    output = io.BytesIO()
+    
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        debug_df.to_excel(writer, index=False)
+        
+    excel_debug = output_debug.getvalue()
+    
     st.download_button(
-        "📥 Télécharger debug complet",
-        debug_df.to_csv(index=False),
-        "debug_matching.csv",
-        "text/csv"
+        label="📥 Télécharger debug Excel",
+        data=excel_debug,
+        file_name="debug_matching.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     
+  
