@@ -45,7 +45,7 @@ if cotation_file and restriction_file:
 
     import io
     
-    output = io.BytesIO()
+    output_debug = io.BytesIO()
     
     with pd.ExcelWriter(output_debug, engine='openpyxl') as writer:
         debug_df.to_excel(writer, index=False)
