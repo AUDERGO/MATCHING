@@ -9,7 +9,7 @@ Outil de croisement :
 1. Upload fichiers Excel
 2. Génération automatique matrice
 3. 0 = OK
-4. >0 = KO
+4. ">0" = KO
 
 ## Règle ENGINS
 
