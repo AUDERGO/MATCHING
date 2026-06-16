@@ -7,7 +7,7 @@ import pandas as pd
 from src.matching import compute_matrix
 from src.debug import build_debug_table
 
-st.title("Matching Ergonomique")
+st.title("Matching Poste - Personne")
 
 cotation_file = st.file_uploader("Cotation", type=["xlsx"])
 restriction_file = st.file_uploader("Restriction", type=["xlsx"])
