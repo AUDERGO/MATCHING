@@ -69,28 +69,9 @@ if cotation_file and restriction_file:
 
     
     nb_critiques = df_calc[
-        (df_calc["nb_postes_possible"] >= 1) &
+        (df_calc["nb_postes_possible"] > 0) &
         (df_calc["nb_postes_possible"] <= 3)
     ].shape[0]
-
-    # =========================
-    # 🚨 LISTE DES CAS CRITIQUES
-    # =========================
-
-    df_critiques = df_calc[
-        (df_calc["nb_postes_possible"] >= 1) &
-        (df_calc["nb_postes_possible"] <= 3)
-    ]
-
-    # Récupérer les matricules (index après ton .T)
-    matricules_critiques = df_critiques.index.tolist()
-
-    # Affichage
-    if len(matricules_critiques) > 0:
-        st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
-        st.write(matricules_critiques)
-    else:
-        st.write("✅ Aucun cas critique")
 
     nb_personnes = df_calc.shape[0]
 
@@ -118,6 +99,51 @@ if cotation_file and restriction_file:
         f"{nb_critiques} ({pct_critiques:.1f}%)"
     )
 
+    # =========================
+    # 🚨 LISTE DES CAS CRITIQUES
+    # =========================
+
+    df_critiques = df_calc[
+        (df_calc["nb_postes_possible"] > 0) &
+        (df_calc["nb_postes_possible"] <= 3)
+    ]
+
+    # Récupérer les matricules (index après ton .T)
+    matricules_critiques = df_critiques.index.tolist()
+
+    # Affichage
+    if len(matricules_critiques) > 0:
+        st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
+        st.write(matricules_critiques)
+    else:
+        st.write("✅ Aucun cas critique")
+"""
+    nb_personnes = df_calc.shape[0]
+
+    pct_all_ok = (nb_all_ok / nb_personnes) * 100
+    pct_avec_nok = (nb_avec_nok / nb_personnes) * 100
+    pct_critiques = (nb_critiques / nb_personnes) * 100
+
+    # Affichage
+    st.write("### 📊 Indicateurs de Match")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric(
+        "✅ Pouvant faire tous les postes",
+        f"{nb_all_ok} ({pct_all_ok:.1f}%)"
+    )
+
+    col2.metric(
+        "⚠️ Nb personnes avec ≥ 1 NOK",
+        f"{nb_avec_nok} ({pct_avec_nok:.1f}%)"
+    )
+
+    col3.metric(
+        "🚨 Dont cas critiques (1 à 3 postes)",
+        f"{nb_critiques} ({pct_critiques:.1f}%)"
+    )
+"""
     import io
 
     output = io.BytesIO()
