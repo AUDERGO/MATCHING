@@ -102,7 +102,7 @@ if cotation_file and restriction_file:
         # =========================
 
         # Ligne personne dans restriction
-        ligne_personne_src = restriction[restriction["matricule"] == matricule]
+        ligne_personne_src = restriction[restriction["Matricule"] == matricule]
 
         # Ligne poste dans cotation
         ligne_poste_src = cotation[cotation["index"] == poste]
