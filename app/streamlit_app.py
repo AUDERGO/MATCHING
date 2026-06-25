@@ -48,19 +48,19 @@ if cotation_file and restriction_file:
             and col not in ["matricule", "index", "precision"]
         ]
 
-        st.write("Nb colonnes communes :", len(colonnes_communes))
-        st.write(colonnes_communes)
+    st.write("Nb colonnes communes :", len(colonnes_communes))
+    st.write(colonnes_communes)
 
-        # Colonnes non alignées (TRÈS IMPORTANT)
-        st.write(
-            "⚠️ Seulement dans restriction :",
-            list(set(restriction.columns) - set(cotation.columns))
-        )
+    # Colonnes non alignées (TRÈS IMPORTANT)
+    st.write(
+        "⚠️ Seulement dans restriction :",
+        list(set(restriction.columns) - set(cotation.columns))
+    )
 
-        st.write(
-            "⚠️ Seulement dans cotation :",
-            list(set(cotation.columns) - set(restriction.columns))
-        )
+    st.write(
+        "⚠️ Seulement dans cotation :",
+        list(set(cotation.columns) - set(restriction.columns))
+    )
 
 
     result = compute_matrix(cotation, restriction)
