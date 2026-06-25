@@ -55,6 +55,25 @@ if cotation_file and restriction_file:
         (df_calc["nb_postes_possible"] <= 3)
     ].shape[0]
 
+    # =========================
+    # 🚨 LISTE DES CAS CRITIQUES
+    # =========================
+
+    df_critiques = df_calc[
+        (df_calc["nb_postes_possible"] >= 1) &
+        (df_calc["nb_postes_possible"] <= 3)
+    ]
+
+    # Récupérer les matricules (index après ton .T)
+    matricules_critiques = df_critiques.index.tolist()
+
+    # Affichage
+    if len(matricules_critiques) > 0:
+        st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
+        st.write(matricules_critiques)
+    else:
+        st.write("✅ Aucun cas critique")
+
     nb_personnes = df_calc.shape[0]
 
     pct_all_ok = (nb_all_ok / nb_personnes) * 100
