@@ -68,7 +68,7 @@ if cotation_file and restriction_file:
 
     col1.metric(
         "✅ Nb personnes pouvant faire tous les postes",
-        "{nb_all_ok} ({pct_all_ok:.1f}%)"
+        f"{nb_all_ok} ({pct_all_ok:.1f}%)"
     )
 
     col2.metric(
