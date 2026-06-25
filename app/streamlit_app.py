@@ -5,8 +5,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import streamlit as st
 import pandas as pd
 from src.matching import compute_matrix
-from src.debug import build_debug_table
 from datetime import datetime
+import io
 
 st.title("Matching Poste - Personne")
 
@@ -15,55 +15,48 @@ restriction_file = st.file_uploader("Restriction", type=["xlsx"])
 
 if cotation_file and restriction_file:
 
+    # =========================
+    # 📥 LECTURE
+    # =========================
+
     cotation = pd.read_excel(cotation_file)
     restriction = pd.read_excel(restriction_file)
 
     # =========================
-    # 📊 INFOS CAPACITÉ
+    # 📊 CAPACITÉ GLOBALE
     # =========================
 
-    # Nb personnes
-    nb_personnes = restriction["Matricule"].nunique()
+    nb_personnes_total = restriction["Matricule"].nunique()
+    nb_places = cotation["nombre de places"].fillna(0).sum()
 
-    # Nb places disponibles (somme colonne nb_places)
-    nb_places = cotation["nombre de places"].sum()
-
-    # Affichage
     st.write("### 📊 Capacité globale")
 
     col1, col2 = st.columns(2)
-
-    col1.metric("👤 Nb personnes", nb_personnes)
+    col1.metric("👤 Nb personnes", nb_personnes_total)
     col2.metric("🏭 Nb places disponibles", int(nb_places))
+
+    # =========================
+    # 🧠 MATRICE MATCHING
+    # =========================
 
     result = compute_matrix(cotation, restriction)
 
-    st.write("### Matrice de matching")
+    st.write("### 📊 Matrice de matching")
     st.dataframe(result)
 
     # =========================
-    # 📊 INDICATEURS AUTOMATIQUES
+    # 📊 CALCUL INDICATEURS
     # =========================
 
     df_calc = result.copy()
 
-    # On met les postes en index
+    # Met les postes en index
     if "index" in df_calc.columns:
         df_calc = df_calc.set_index("index")
 
-    # TRANSPOSE : on veut personnes en lignes
+    # Transpose → personnes en lignes
     df_calc = df_calc.T
     df_calc = df_calc.fillna(0)
-
-    nb_postes = df_calc.shape[1]
-
-    """
-    # Nombre de NOK par personne
-    df_calc["nb_NOK"] = df_calc.sum(axis=1)
-
-    # Nombre de postes possibles
-    df_calc["nb_postes_possible"] = nb_postes - df_calc["nb_NOK"]
-    """
 
     # ✅ nb postes possibles (score == 0)
     df_calc["nb_postes_possible"] = (df_calc == 0).sum(axis=1)
@@ -71,45 +64,32 @@ if cotation_file and restriction_file:
     # ✅ nb postes NOK (score > 0)
     df_calc["nb_NOK"] = (df_calc > 0).sum(axis=1)
 
-    # Calculs taux
+    # =========================
+    # 📊 KPI GLOBAUX
+    # =========================
+
+    nb_personnes = df_calc.shape[0]
+
     nb_all_ok = (df_calc["nb_NOK"] == 0).sum()
     nb_avec_nok = (df_calc["nb_NOK"] >= 1).sum()
 
-    
-    nb_critiques = df_calc[
-        (df_calc["nb_postes_possible"] >= 1) &
-        (df_calc["nb_postes_possible"] <= 3)
-    ].shape[0]
-
-
-    # =========================
-    # 🚨 LISTE DES CAS CRITIQUES
-    # =========================
-
+    # ✅ cas critiques
     df_critiques = df_calc[
         (df_calc["nb_postes_possible"] >= 1) &
         (df_calc["nb_postes_possible"] <= 3)
     ]
 
-    # Récupérer les matricules (index après ton .T)
-    matricules_critiques = df_critiques.index.tolist()
+    nb_critiques = df_critiques.shape[0]
 
-    """
-    # Affichage
-    if len(matricules_critiques) > 0:
-        st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
-        st.write(matricules_critiques)
-    else:
-        st.write("✅ Aucun cas critique")
-    """
- 
-    nb_personnes = df_calc.shape[0]
-
+    # ✅ pourcentages
     pct_all_ok = (nb_all_ok / nb_personnes) * 100
     pct_avec_nok = (nb_avec_nok / nb_personnes) * 100
     pct_critiques = (nb_critiques / nb_personnes) * 100
 
-    # Affichage
+    # =========================
+    # 📊 AFFICHAGE KPI
+    # =========================
+
     st.write("### 📊 Indicateurs de Match")
 
     col1, col2, col3 = st.columns(3)
@@ -125,17 +105,24 @@ if cotation_file and restriction_file:
     )
 
     col3.metric(
-        "🚨 Dont cas critiques (1 à 3 postes)",
+        "🚨 Cas critiques (1 à 3 postes)",
         f"{nb_critiques} ({pct_critiques:.1f}%)"
     )
 
-    # Affichage
+    # =========================
+    # 🚨 LISTE MATRICULES CRITIQUES
+    # =========================
+
+    matricules_critiques = df_critiques.index.tolist()
+
+    st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
+
     if len(matricules_critiques) > 0:
-        st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
-        st.write(matricules_critiques)
+        for m in matricules_critiques:
+            st.write(f"- {m}")
     else:
         st.write("✅ Aucun cas critique")
-
+        
     
     import io
 
