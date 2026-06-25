@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 from src.matching import compute_matrix
 from src.debug import build_debug_table
+from datetime import datetime
 
 st.title("Matching Poste - Personne")
 
@@ -64,9 +65,20 @@ if cotation_file and restriction_file:
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("✅ Nb personnes pouvant faire tous les postes", nb_all_ok)
-    col2.metric("⚠️ Nb personnes qui ont au moins 1 poste NOK", nb_avec_nok)
-    col3.metric("Dont nb personnes 'critique' 1 à 3 postes possibles", nb_critiques)
+    col1.metric(
+        "✅ Nb personnes pouvant faire tous les postes",
+        "{nb_all_ok} ({pct_all_ok:.1f}%)"
+    )
+
+    col2.metric(
+        "⚠️ Nb personnes avec ≥ 1 NOK",
+        f"{nb_avec_nok} ({pct_avec_nok:.1f}%)"
+    )
+
+    col3.metric(
+        "🚨 Dont cas critiques (1 à 3 postes)",
+        f"{nb_critiques} ({pct_critiques:.1f}%)"
+    )
 
     import io
 
@@ -181,11 +193,13 @@ if cotation_file and restriction_file:
         result.to_excel(writer, index=False)
         
     excel_data = output.getvalue()
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
     
     st.download_button(
         label="📥 Télécharger matrice Excel",
         data=excel_data,
-        file_name="matrice_matching.xlsx",
+        file_name=f"matrice_matching_{timestamp}.xlsx"
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
