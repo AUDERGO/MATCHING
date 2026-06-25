@@ -204,4 +204,11 @@ if cotation_file and restriction_file:
             else:
                 st.error(f"❌ NOK : {nb_blocages} blocage(s) détecté(s)")
 
-    
+    colonnes_communes = [
+        col for col in restriction.columns
+        if col in cotation.columns
+        and col not in ["matricule", "index", "precision"]
+    ]
+
+    st.write("Nb colonnes communes :", len(colonnes_communes))
+    st.write(colonnes_communes)
