@@ -36,7 +36,7 @@ if cotation_file and restriction_file:
     col2.metric("🏭 Nb places disponibles", int(nb_places))
 
     # =========================
-    # 🧠 MATRICE MATCHING
+    # 🧠 MATRICE
     # =========================
 
     result = compute_matrix(cotation, restriction)
@@ -45,40 +45,32 @@ if cotation_file and restriction_file:
     st.dataframe(result)
 
     # =========================
-    # 📊 CALCUL INDICATEURS
+    # 🧮 PREPA INDICATEURS
     # =========================
 
     df_calc = result.copy()
 
-    # Met les postes en index
     if "index" in df_calc.columns:
         df_calc = df_calc.set_index("index")
 
-    """
-    # Transpose → personnes en lignes
-    df_calc = df_calc.T
-    df_calc = df_calc.fillna(0)
+    # personnes en lignes
+    df_calc = df_calc.T.fillna(0)
 
-    # ✅ nb postes possibles (score == 0)
-    df_calc["nb_postes_possible"] = (df_calc == 0).sum(axis=1)
-
-    # ✅ nb postes NOK (score > 0)
-    df_calc["nb_NOK"] = (df_calc > 0).sum(axis=1)
-    """
-
-    # Transpose → personnes en lignes
-    df_calc = df_calc.T
-    df_calc = df_calc.fillna(0)
-
-    # ✅ conserver uniquement les colonnes postes
+    # ✅ IMPORTANT : on isole uniquement les colonnes postes
     df_postes = df_calc.copy()
 
-    # ✅ calculs propres
+    # =========================
+    # 📊 CALCULS CORRECTS
+    # =========================
+
+    # nb postes possibles = score == 0
     df_calc["nb_postes_possible"] = (df_postes == 0).sum(axis=1)
+
+    # nb NOK = score > 0
     df_calc["nb_NOK"] = (df_postes > 0).sum(axis=1)
 
     # =========================
-    # 📊 KPI GLOBAUX
+    # 📊 KPI
     # =========================
 
     nb_personnes = df_calc.shape[0]
@@ -86,7 +78,6 @@ if cotation_file and restriction_file:
     nb_all_ok = (df_calc["nb_NOK"] == 0).sum()
     nb_avec_nok = (df_calc["nb_NOK"] >= 1).sum()
 
-    # ✅ cas critiques
     df_critiques = df_calc[
         (df_calc["nb_postes_possible"] >= 1) &
         (df_calc["nb_postes_possible"] <= 3)
@@ -94,7 +85,6 @@ if cotation_file and restriction_file:
 
     nb_critiques = df_critiques.shape[0]
 
-    # ✅ pourcentages
     pct_all_ok = (nb_all_ok / nb_personnes) * 100
     pct_avec_nok = (nb_avec_nok / nb_personnes) * 100
     pct_critiques = (nb_critiques / nb_personnes) * 100
@@ -123,31 +113,32 @@ if cotation_file and restriction_file:
     )
 
     # =========================
-    # 🚨 LISTE MATRICULES CRITIQUES
+    # 🚨 LISTE CRITIQUES
     # =========================
 
-    matricules_critiques = df_critiques.index.tolist()
-
     st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
+
+    matricules_critiques = df_critiques.index.tolist()
 
     if len(matricules_critiques) > 0:
         for m in matricules_critiques:
             st.write(f"- {m}")
     else:
         st.write("✅ Aucun cas critique")
-        
-    
-    import io
+
+    # =========================
+    # 📥 EXPORT EXCEL
+    # =========================
 
     output = io.BytesIO()
-    
+
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         result.to_excel(writer, index=False)
-        
+
     excel_data = output.getvalue()
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    
+
     st.download_button(
         label="📥 Télécharger matrice Excel",
         data=excel_data,
