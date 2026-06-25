@@ -57,11 +57,19 @@ if cotation_file and restriction_file:
 
     nb_postes = df_calc.shape[1]
 
+    """
     # Nombre de NOK par personne
     df_calc["nb_NOK"] = df_calc.sum(axis=1)
 
     # Nombre de postes possibles
     df_calc["nb_postes_possible"] = nb_postes - df_calc["nb_NOK"]
+    """
+
+    # ✅ nb postes possibles (score == 0)
+    df_calc["nb_postes_possible"] = (df_calc == 0).sum(axis=1)
+
+    # ✅ nb postes NOK (score > 0)
+    df_calc["nb_NOK"] = (df_calc > 0).sum(axis=1)
 
     # Calculs taux
     nb_all_ok = (df_calc["nb_NOK"] == 0).sum()
@@ -86,13 +94,14 @@ if cotation_file and restriction_file:
     # Récupérer les matricules (index après ton .T)
     matricules_critiques = df_critiques.index.tolist()
 
+    """
     # Affichage
     if len(matricules_critiques) > 0:
         st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
         st.write(matricules_critiques)
     else:
         st.write("✅ Aucun cas critique")
-    
+    """
  
     nb_personnes = df_calc.shape[0]
 
@@ -119,6 +128,13 @@ if cotation_file and restriction_file:
         "🚨 Dont cas critiques (1 à 3 postes)",
         f"{nb_critiques} ({pct_critiques:.1f}%)"
     )
+
+    # Affichage
+    if len(matricules_critiques) > 0:
+        st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
+        st.write(matricules_critiques)
+    else:
+        st.write("✅ Aucun cas critique")
 
     
     import io
