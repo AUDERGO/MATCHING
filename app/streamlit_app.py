@@ -18,6 +18,24 @@ if cotation_file and restriction_file:
     cotation = pd.read_excel(cotation_file)
     restriction = pd.read_excel(restriction_file)
 
+    # =========================
+    # 📊 INFOS CAPACITÉ
+    # =========================
+
+    # Nb personnes
+    nb_personnes = restriction["Matricule"].nunique()
+
+    # Nb places disponibles (somme colonne nb_places)
+    nb_places = cotation["nombre de places"].sum()
+
+    # Affichage
+    st.write("### 📊 Capacité globale")
+
+    col1, col2 = st.columns(2)
+
+    col1.metric("👤 Nb personnes", nb_personnes)
+    col2.metric("🏭 Nb places disponibles", int(nb_places))
+
     result = compute_matrix(cotation, restriction)
 
     st.write("### Matrice de matching")
