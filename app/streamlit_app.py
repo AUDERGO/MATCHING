@@ -83,6 +83,23 @@ if cotation_file and restriction_file:
 
     import io
 
+    output = io.BytesIO()
+    
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        result.to_excel(writer, index=False)
+        
+    excel_data = output.getvalue()
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    
+    st.download_button(
+        label="📥 Télécharger matrice Excel",
+        data=excel_data,
+        file_name=f"matrice_matching_{timestamp}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
     # =========================
     # 🔎 ANALYSE DETAILLEE METIER
     # =========================
@@ -187,20 +204,4 @@ if cotation_file and restriction_file:
             else:
                 st.error(f"❌ NOK : {nb_blocages} blocage(s) détecté(s)")
 
-    output = io.BytesIO()
     
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        result.to_excel(writer, index=False)
-        
-    excel_data = output.getvalue()
-
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    
-    st.download_button(
-        label="📥 Télécharger matrice Excel",
-        data=excel_data,
-        file_name=f"matrice_matching_{timestamp}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-
