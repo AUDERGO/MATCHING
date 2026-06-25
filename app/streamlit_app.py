@@ -22,6 +22,45 @@ if cotation_file and restriction_file:
     st.write("### Matrice de matching")
     st.dataframe(result)
 
+    # =========================
+    # 📊 INDICATEURS AUTOMATIQUES
+    # =========================
+
+    df_calc = result.copy()
+
+    # On met les postes en index
+    if "index" in df_calc.columns:
+        df_calc = df_calc.set_index("index")
+
+    # TRANSPOSE : on veut personnes en lignes
+    df_calc = df_calc.T
+
+    nb_postes = df_calc.shape[1]
+
+    # Nombre de NOK par personne
+    df_calc["nb_NOK"] = df_calc.sum(axis=1)
+
+    # Nombre de postes possibles
+    df_calc["nb_postes_possible"] = nb_postes - df_calc["nb_NOK"]
+
+    # Calculs taux
+    nb_all_ok = (df_calc["nb_NOK"] == 0).sum()
+    nb_avec_nok = (df_calc["nb_NOK"] >= 1).sum()
+
+    nb_critiques = df_calc[
+        (df_calc["nb_postes_possible"] >= 1) &
+        (df_calc["nb_postes_possible"] <= 3)
+    ].shape[0]
+
+    # Affichage
+    st.write("### 📊 Indicateurs de Match")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("✅ 0 NOK (tous postes)", nb_all_ok)
+    col2.metric("⚠️ ≥ 1 NOK", nb_avec_nok)
+    col3.metric("🚨 1 à 3 postes possibles", nb_critiques)
+
     import io
     
     output = io.BytesIO()
