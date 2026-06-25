@@ -54,6 +54,7 @@ if cotation_file and restriction_file:
     if "index" in df_calc.columns:
         df_calc = df_calc.set_index("index")
 
+    """
     # Transpose → personnes en lignes
     df_calc = df_calc.T
     df_calc = df_calc.fillna(0)
@@ -63,6 +64,18 @@ if cotation_file and restriction_file:
 
     # ✅ nb postes NOK (score > 0)
     df_calc["nb_NOK"] = (df_calc > 0).sum(axis=1)
+    """
+
+    # Transpose → personnes en lignes
+    df_calc = df_calc.T
+    df_calc = df_calc.fillna(0)
+
+    # ✅ conserver uniquement les colonnes postes
+    df_postes = df_calc.copy()
+
+    # ✅ calculs propres
+    df_calc["nb_postes_possible"] = (df_postes == 0).sum(axis=1)
+    df_calc["nb_NOK"] = (df_postes > 0).sum(axis=1)
 
     # =========================
     # 📊 KPI GLOBAUX
