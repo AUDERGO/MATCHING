@@ -58,102 +58,115 @@ if cotation_file and restriction_file:
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("✅ 0 NOK (tous postes)", nb_all_ok)
-    col2.metric("⚠️ ≥ 1 NOK", nb_avec_nok)
-    col3.metric("🚨 1 à 3 postes possibles", nb_critiques)
+    col1.metric("✅ Nb personnes pouvant faire tous les postes", nb_all_ok)
+    col2.metric("⚠️ Nb personnes qui ont au moins 1 poste NOK", nb_avec_nok)
+    col3.metric("Dont nb personnes 'critique' 1 à 3 postes possibles", nb_critiques)
 
     import io
 
     # =========================
-    # 🔎 ANALYSE DETAILLEE COMPLETE
+    # 🔎 ANALYSE DETAILLEE METIER
     # =========================
 
     st.write("### 🔎 Analyse détaillée")
 
-    df_analyse = result.copy()
+    # 👉 saisie libre matricule
+    matricule = st.text_input("Saisir un matricule")
 
-    # Postes en index
-    if "index" in df_analyse.columns:
-        df_analyse = df_analyse.set_index("index")
+    # 👉 choix poste
+    poste = st.selectbox("Choisir un poste", result["index"])
 
-    # Transpose : personnes en lignes
-    df_analyse = df_analyse.T
-    df_analyse = df_analyse.fillna(0)
+    if matricule:
 
-    # Sélection utilisateur
-    matricule = st.selectbox("Choisir un matricule", df_analyse.index)
-    poste = st.selectbox("Choisir un poste", df_analyse.columns)
+        # =========================
+        # 🔍 LIGNES SOURCE
+        # =========================
 
-    # Valeur de matching
-    match_value = df_analyse.loc[matricule, poste]
+        # Ligne personne dans restriction
+        ligne_personne_src = restriction[restriction["matricule"] == matricule]
 
-    # =========================
-    # ✅ RESULTAT GLOBAL
-    # =========================
+        # Ligne poste dans cotation
+        ligne_poste_src = cotation[cotation["index"] == poste]
 
-    st.write("### ✅ Résultat du matching")
+        if ligne_personne_src.empty:
+            st.error("Matricule non trouvé dans le fichier restriction")
+        elif ligne_poste_src.empty:
+            st.error("Poste non trouvé dans le fichier cotation")
+        else:
 
-    if match_value == 0:
-        st.success("✅ Compatible")
-    else:
-        st.error("❌ NOK (blocage)")
+            ligne_personne_src = ligne_personne_src.iloc[0]
+            ligne_poste_src = ligne_poste_src.iloc[0]
 
-    # =========================
-    # DETAIL PERSONNE
-    # =========================
+            # =========================
+            # 👤 DETAIL PERSONNE (1 ligne)
+            # =========================
 
-    st.write("### 👤 Détail personne")
+            st.write("### 👤 Détail personne (restriction)")
 
-    ligne_personne = df_analyse.loc[matricule]
-    st.dataframe(ligne_personne.to_frame(name="Valeur"))
+            st.dataframe(ligne_personne_src.to_frame(name="Valeur"))
 
-    # =========================
-    # 🏭 DETAIL POSTE
-    # =========================
+            # Affichage du texte précision si existe
+            if "precision" in ligne_personne_src.index:
+                st.info(f"💬 Précision : {ligne_personne_src['precision']}")
 
-    st.write("### 🏭 Détail poste")
+            # =========================
+            # 🏭 DETAIL POSTE (1 ligne)
+            # =========================
 
-    df_poste_vue = result.copy()
+            st.write("### 🏭 Détail poste (cotation)")
 
-    if "index" in df_poste_vue.columns:
-        df_poste_vue = df_poste_vue.set_index("index")
+            st.dataframe(ligne_poste_src.to_frame(name="Valeur"))
 
-    ligne_poste = df_poste_vue.loc[poste]
+            # =========================
+            # 🔁 TABLEAU CROISEMENT SIMPLE
+            # =========================
 
-    st.dataframe(ligne_poste.to_frame(name="Valeur"))
+            st.write("### 📊 Analyse croisée")
 
-    # =========================
-    # ANALYSE DES BLOCAGES
-    # =========================
+            # On garde seulement colonnes communes (colonnes métier)
+            colonnes_communes = [
+                col for col in restriction.columns
+                if col in cotation.columns
+                and col not in ["matricule", "index", "precision"]
+            ]
 
-    st.write("### Analyse des blocages")
+            data_compare = []
 
-    if match_value == 0:
-        st.success("✅ Aucun blocage : personne compatible avec ce poste")
+            for col in colonnes_communes:
+                val_personne = ligne_personne_src[col]
+                val_poste = ligne_poste_src[col]
 
-    else:
-        st.error("❌ NOK : cette personne ne peut pas occuper ce poste")
+                # règle : blocage si 1 et 1
+                croisement = 1 if (val_personne == 1 and val_poste == 1) else 0
 
-        st.info("👉 Voir le détail dans le tableau debug ci-dessous pour comprendre la cause exacte")
+                data_compare.append([col, val_personne, val_poste, croisement])
 
+            df_compare = pd.DataFrame(
+                data_compare,
+                columns=["Critère", "Personne (0/1)", "Poste (0/1)", "Blocage"]
+            )
 
-    # =========================
-    # 🎨 VUE COMPARATIVE (TRÈS UTILE)
-    # =========================
+            # =========================
+            # 🎨 VISUALISATION SIMPLE
+            # =========================
 
-    st.write("### 📊 Comparaison personne vs poste")
+            def highlight_blocage(row):
+                if row["Blocage"] == 1:
+                    return ["background-color: red"] * 4
+                return [""] * 4
 
-    df_compare = pd.DataFrame({
-        "Personne": ligne_personne,
-        "Poste": ligne_poste
-    })
+            st.dataframe(df_compare.style.apply(highlight_blocage, axis=1))
 
-    def highlight_blocages(row):
-        if row["Personne"] == 1 and row["Poste"] == 1:
-            return ["background-color: red"] * 2
-        return [""] * 2
+            # =========================
+            # ✅ RESULTAT GLOBAL
+            # =========================
 
-    st.dataframe(df_compare.style.apply(highlight_blocages, axis=1))
+            nb_blocages = df_compare["Blocage"].sum()
+
+            if nb_blocages == 0:
+                st.success("✅ OK : aucun blocage")
+            else:
+                st.error(f"❌ NOK : {nb_blocages} blocage(s) détecté(s)")
 
 
     output = io.BytesIO()
