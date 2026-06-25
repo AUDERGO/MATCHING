@@ -199,7 +199,7 @@ if cotation_file and restriction_file:
     st.download_button(
         label="📥 Télécharger matrice Excel",
         data=excel_data,
-        file_name=f"matrice_matching_{timestamp}.xlsx"
+        file_name=f"matrice_matching_{timestamp}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
