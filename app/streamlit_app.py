@@ -203,3 +203,9 @@ if cotation_file and restriction_file:
                 st.success("✅ OK : aucun blocage")
             else:
                 st.error(f"❌ NOK : {nb_blocages} blocage(s) détecté(s)")
+
+    colonnes_communes = [
+        col for col in restriction.columns
+        if col in cotation.columns
+        and col not in ["Matricule", "index", "precision", "Engin"]  # 👈 EXCLUSION
+    ]
