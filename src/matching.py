@@ -46,6 +46,9 @@ def compute_matrix(cotation, restriction):
 
     for _, poste_row in cotation.iterrows():
 
+        if pd.isna(poste_row["Poste"]) or str(poste_row["Poste"]).strip() == "":
+            continue
+
         row_result = {"Poste": poste_row["Poste"]}
 
         for _, restr_row in restriction.iterrows():
