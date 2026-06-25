@@ -48,6 +48,12 @@ if cotation_file and restriction_file:
     nb_all_ok = (df_calc["nb_NOK"] == 0).sum()
     nb_avec_nok = (df_calc["nb_NOK"] >= 1).sum()
 
+    nb_personnes = df_calc.shape[0]
+
+    pct_all_ok = (nb_all_ok / nb_personnes) * 100
+    pct_avec_nok = (nb_avec_nok / nb_personnes) * 100
+    pct_critiques = (nb_critiques / nb_personnes) * 100
+
     nb_critiques = df_calc[
         (df_calc["nb_postes_possible"] >= 1) &
         (df_calc["nb_postes_possible"] <= 3)
