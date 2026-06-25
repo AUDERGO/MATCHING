@@ -4,28 +4,31 @@ def check_engin(poste_row, restr_row):
 
     engin_cols = ["engin_debout", "engin_retract", "engin_frontal"]
 
-    poste_has_engin = any(poste_row[col] == 1 for col in engin_cols)
+    # =========================
+    # ✅ 1. Cas interdiction totale (engin_tous)
+    # =========================
+    poste_has_engin = any(poste_row.get(col, 0) == 1 for col in engin_cols)
 
-    if not poste_has_engin:
-        return False
-   
-    engin_global = max(
-        restr_row.get("Engin", 0),
-        restr_row.get("engin_tous", 0)
-    )
-    
-    # ✅ interdiction totale
-    if engin_global == 1:
-        return True
+    if restr_row.get("engin_tous", 0) == 1 and poste_has_engin:
+        return True  # ❌ blocage
 
-    # ✅ restriction spécifique
+    # =========================
+    # ✅ 2. Cas standard : restriction spécifique
+    # =========================
     for col in engin_cols:
-        if poste_row[col] == 1 and restr_row[col] >= 1:
-            return True
+        if poste_row.get(col, 0) == 1:
 
-    # ✅ OK
+            # Si la personne ne peut pas utiliser cet engin → blocage
+            if restr_row.get(col, 0) == 1:
+                return True
+
+            # Sinon c’est OK
+            return False
+
+    # =========================
+    # ✅ 3. Aucun engin demandé
+    # =========================
     return False
-
 
 def compute_matrix(cotation, restriction):
 
@@ -33,7 +36,7 @@ def compute_matrix(cotation, restriction):
 
     common_cols = list(set(cotation.columns) & set(restriction.columns))
     
-    cols_to_exclude = ["posture"]
+    cols_to_exclude = ["posture","engin"]
     
     common_cols = [col for col in common_cols if col not in cols_to_exclude]
 
