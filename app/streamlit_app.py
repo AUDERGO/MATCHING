@@ -117,7 +117,8 @@ if cotation_file and restriction_file:
         st.write(matricules_critiques)
     else:
         st.write("✅ Aucun cas critique")
-"""
+    
+    """
     nb_personnes = df_calc.shape[0]
 
     pct_all_ok = (nb_all_ok / nb_personnes) * 100
@@ -143,7 +144,8 @@ if cotation_file and restriction_file:
         "🚨 Dont cas critiques (1 à 3 postes)",
         f"{nb_critiques} ({pct_critiques:.1f}%)"
     )
-"""
+    """
+    
     import io
 
     output = io.BytesIO()
