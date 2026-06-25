@@ -105,7 +105,7 @@ if cotation_file and restriction_file:
         ligne_personne_src = restriction[restriction["Matricule"] == matricule]
 
         # Ligne poste dans cotation
-        ligne_poste_src = cotation[cotation["index"] == poste]
+        ligne_poste_src = cotation[cotation["Poste"] == poste]
 
         if ligne_personne_src.empty:
             st.error("Matricule non trouvé dans le fichier restriction")
@@ -146,7 +146,7 @@ if cotation_file and restriction_file:
             colonnes_communes = [
                 col for col in restriction.columns
                 if col in cotation.columns
-                and col not in ["matricule", "index", "precision"]
+                and col not in ["Matricule", "Poste", "precision"]
             ]
 
             data_compare = []
