@@ -7,6 +7,22 @@ import pandas as pd
 from src.matching import compute_matrix
 from src.debug import build_debug_table
 from datetime import datetime
+import unicodedata
+
+# =========================
+# 🔧 FONCTION CLEAN COLONNES
+# =========================
+def clean_columns(df):
+    df.columns = (
+        df.columns
+        .str.strip()                      # supprime espaces
+        .str.lower()                      # minuscule
+        .map(lambda x: unicodedata.normalize("NFKD", x))  # enlève accents
+        .str.encode("ascii", errors="ignore")
+        .str.decode("utf-8")
+    )
+    return df
+
 
 st.title("Matching Poste - Personne")
 
@@ -17,6 +33,35 @@ if cotation_file and restriction_file:
 
     cotation = pd.read_excel(cotation_file)
     restriction = pd.read_excel(restriction_file)
+
+    cotation = clean_columns(cotation)
+    restriction = clean_columns(restriction)
+
+    
+    st.write("Colonnes cotation :", cotation.columns)
+    st.write("Colonnes restriction :", restriction.columns)
+
+    
+    colonnes_communes = [
+            col for col in restriction.columns
+            if col in cotation.columns
+            and col not in ["matricule", "index", "precision"]
+        ]
+
+        st.write("Nb colonnes communes :", len(colonnes_communes))
+        st.write(colonnes_communes)
+
+        # Colonnes non alignées (TRÈS IMPORTANT)
+        st.write(
+            "⚠️ Seulement dans restriction :",
+            list(set(restriction.columns) - set(cotation.columns))
+        )
+
+        st.write(
+            "⚠️ Seulement dans cotation :",
+            list(set(cotation.columns) - set(restriction.columns))
+        )
+
 
     result = compute_matrix(cotation, restriction)
 
