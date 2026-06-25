@@ -34,6 +34,7 @@ if cotation_file and restriction_file:
 
     # TRANSPOSE : on veut personnes en lignes
     df_calc = df_calc.T
+    df_calc = df_calc.fillna(0)
 
     nb_postes = df_calc.shape[1]
 
@@ -62,7 +63,99 @@ if cotation_file and restriction_file:
     col3.metric("🚨 1 à 3 postes possibles", nb_critiques)
 
     import io
-    
+
+    # =========================
+    # 🔎 ANALYSE DETAILLEE COMPLETE
+    # =========================
+
+    st.write("### 🔎 Analyse détaillée")
+
+    df_analyse = result.copy()
+
+    # Postes en index
+    if "index" in df_analyse.columns:
+        df_analyse = df_analyse.set_index("index")
+
+    # Transpose : personnes en lignes
+    df_analyse = df_analyse.T
+    df_analyse = df_analyse.fillna(0)
+
+    # Sélection utilisateur
+    matricule = st.selectbox("Choisir un matricule", df_analyse.index)
+    poste = st.selectbox("Choisir un poste", df_analyse.columns)
+
+    # Valeur de matching
+    match_value = df_analyse.loc[matricule, poste]
+
+    # =========================
+    # ✅ RESULTAT GLOBAL
+    # =========================
+
+    st.write("### ✅ Résultat du matching")
+
+    if match_value == 0:
+        st.success("✅ Compatible")
+    else:
+        st.error("❌ NOK (blocage)")
+
+    # =========================
+    # DETAIL PERSONNE
+    # =========================
+
+    st.write("### 👤 Détail personne")
+
+    ligne_personne = df_analyse.loc[matricule]
+    st.dataframe(ligne_personne.to_frame(name="Valeur"))
+
+    # =========================
+    # 🏭 DETAIL POSTE
+    # =========================
+
+    st.write("### 🏭 Détail poste")
+
+    df_poste_vue = result.copy()
+
+    if "index" in df_poste_vue.columns:
+        df_poste_vue = df_poste_vue.set_index("index")
+
+    ligne_poste = df_poste_vue.loc[poste]
+
+    st.dataframe(ligne_poste.to_frame(name="Valeur"))
+
+    # =========================
+    # ANALYSE DES BLOCAGES
+    # =========================
+
+    st.write("### Analyse des blocages")
+
+    if match_value == 0:
+        st.success("✅ Aucun blocage : personne compatible avec ce poste")
+
+    else:
+        st.error("❌ NOK : cette personne ne peut pas occuper ce poste")
+
+        st.info("👉 Voir le détail dans le tableau debug ci-dessous pour comprendre la cause exacte")
+
+
+    # =========================
+    # 🎨 VUE COMPARATIVE (TRÈS UTILE)
+    # =========================
+
+    st.write("### 📊 Comparaison personne vs poste")
+
+    df_compare = pd.DataFrame({
+        "Personne": ligne_personne,
+        "Poste": ligne_poste
+    })
+
+    def highlight_blocages(row):
+        if row["Personne"] == 1 and row["Poste"] == 1:
+            return ["background-color: red"] * 2
+        return [""] * 2
+
+    st.dataframe(df_compare.style.apply(highlight_blocages, axis=1))
+
+
     output = io.BytesIO()
     
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -82,7 +175,6 @@ if cotation_file and restriction_file:
     st.write("### 🔎 Détail complet (debug brut)")
     st.dataframe(debug_df)
 
-    import io
     
     output_debug = io.BytesIO()
     
