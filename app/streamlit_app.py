@@ -60,7 +60,7 @@ if cotation_file and restriction_file:
     # =========================
     # 🧮 PREPA INDICATEURS
     # =========================
-
+    """
     df_calc = result.copy()
 
     if "index" in df_calc.columns:
@@ -69,9 +69,32 @@ if cotation_file and restriction_file:
     # personnes en lignes
     df_calc = df_calc.T.fillna(0)
 
+
     # ✅ IMPORTANT : on isole uniquement les colonnes postes
     df_postes = df_calc.copy()
 
+    """
+    
+    # personnes en lignes
+    df_calc = result.copy()
+
+    if "index" in df_calc.columns:
+        df_calc = df_calc.set_index("index")
+
+    df_calc = df_calc.T.fillna(0)
+
+    # ✅ on isole UNIQUEMENT les colonnes postes
+    df_postes = df_calc.copy()
+
+    # =========================
+    # 📊 CALCULS
+    # =========================
+
+    df_calc["nb_postes_possible"] = (df_postes == 0).sum(axis=1)
+    df_calc["nb_NOK"] = (df_postes > 0).sum(axis=1)
+
+
+    """
     # =========================
     # 📊 CALCULS CORRECTS
     # =========================
@@ -81,6 +104,7 @@ if cotation_file and restriction_file:
 
     # nb NOK = score > 0
     df_calc["nb_NOK"] = (df_postes > 0).sum(axis=1)
+    """
 
     # =========================
     # 📊 KPI
