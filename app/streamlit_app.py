@@ -10,6 +10,8 @@ import io
 
 st.title("Matching Poste - Personne")
 
+st.write("✅ VERSION ACTUELLE DEBUG")
+
 cotation_file = st.file_uploader("Cotation", type=["xlsx"])
 restriction_file = st.file_uploader("Restriction", type=["xlsx"])
 
