@@ -25,10 +25,11 @@ if cotation_file and restriction_file:
     # =========================
     # 📊 CAPACITÉ GLOBALE
     # =========================
-    """
+
+"""
     nb_personnes_total = restriction["Matricule"].nunique()
     nb_places = cotation["nombre de places"].fillna(0).sum()
-    """
+"""
 
     nb_personnes_total = restriction["Matricule"].nunique()
 
