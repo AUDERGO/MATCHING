@@ -42,16 +42,10 @@ if cotation_file and restriction_file:
 
     st.write("### 📊 Capacité globale")
 
-col1, col2 = st.columns(2)
-col1.metric("👤 Nb personnes", nb_personnes_total)
-col2.metric(label_places, int(nb_places))
-``
-
-    st.write("### 📊 Capacité globale")
-
     col1, col2 = st.columns(2)
     col1.metric("👤 Nb personnes", nb_personnes_total)
-    col2.metric("🏭 Nb places disponibles", int(nb_places))
+    col2.metric(label_places, int(nb_places))
+
 
     # =========================
     # 🧠 MATRICE
