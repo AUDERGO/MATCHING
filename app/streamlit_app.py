@@ -25,9 +25,27 @@ if cotation_file and restriction_file:
     # =========================
     # 📊 CAPACITÉ GLOBALE
     # =========================
-
+    """
     nb_personnes_total = restriction["Matricule"].nunique()
     nb_places = cotation["nombre de places"].fillna(0).sum()
+    """
+
+    nb_personnes_total = restriction["Matricule"].nunique()
+
+    # ✅ Gestion robuste présence / absence de la colonne
+    if "nombre de places" in cotation.columns:
+        nb_places = cotation["nombre de places"].fillna(0).sum()
+        label_places = "🏭 Nb places disponibles"
+    else:
+        nb_places = cotation.shape[0]
+        label_places = "🏭 Nb postes (proxy)"
+
+    st.write("### 📊 Capacité globale")
+
+col1, col2 = st.columns(2)
+col1.metric("👤 Nb personnes", nb_personnes_total)
+col2.metric(label_places, int(nb_places))
+``
 
     st.write("### 📊 Capacité globale")
 
