@@ -1,33 +1,5 @@
 import pandas as pd
 
-def load_cotations_clean(file_path):
-    # Lecture fichier
-    df = pd.read_excel(file_path)
-
-    # Colonnes à utiliser pour le matching
-    matching_columns = [
-        "engin_debout",
-        "engin_frontal",
-        "engin_retract",
-        "engin_tous",
-        "membres_inf",
-        "poignet",
-        "epaule",
-        "dos",
-        "cervicales",
-    ]
-
-    # Vérification sécurité
-    missing = [col for col in matching_columns if col not in df.columns]
-    if missing:
-        raise ValueError(f"Colonnes manquantes : {missing}")
-
-    # On garde uniquement Poste + colonnes utiles
-    df_clean = df[["Poste"] + matching_columns].copy()
-
-    return df_clean
-
-
 def check_engin(poste_row, restr_row):
 
     engin_cols = ["engin_debout", "engin_retract", "engin_frontal"]
@@ -50,23 +22,44 @@ def check_engin(poste_row, restr_row):
             if restr_row.get(col, 0) == 1:
                 return True
 
-            # Sinon c’est OK
-            return False
-
-    # =========================
-    # ✅ 3. Aucun engin demandé
-    # =========================
+    # Sinon c’est OK
     return False
 
 def compute_matrix(cotation, restriction):
 
     results = []
-
+    """
     common_cols = list(set(cotation.columns) & set(restriction.columns))
     
     cols_to_exclude = ["posture","engin"]
     
     common_cols = [col for col in common_cols if col not in cols_to_exclude]
+    """
+
+    # ✅ Colonnes utilisées UNIQUEMENT pour le matching
+    matching_columns = [
+        "engin_debout",
+        "engin_frontal",
+        "engin_retract",
+        "engin_tous",
+        "membres_inf",
+        "poignet",
+        "epaule",
+        "dos",
+        "cervicales",
+    ]
+
+    # ✅ vérification sécurité
+    missing = [col for col in matching_columns if col not in cotation.columns]
+    if missing:
+        raise ValueError(f"Colonnes manquantes dans cotation : {missing}")
+
+    missing_restr = [col for col in matching_columns if col not in restriction.columns]
+    if missing_restr:
+        raise ValueError(f"Colonnes manquantes dans restriction : {missing_restr}")
+
+    # ✅ on fixe les colonnes utilisées
+    common_cols = matching_columns.copy()
 
     for col in ["Poste", "Matricule"]:
         if col in common_cols:
