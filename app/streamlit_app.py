@@ -10,8 +10,6 @@ import io
 
 st.title("Matching Poste - Personne")
 
-st.write("✅ VERSION ACTUELLE DEBUG")
-
 cotation_file = st.file_uploader("Cotation", type=["xlsx"])
 restriction_file = st.file_uploader("Restriction", type=["xlsx"])
 
@@ -28,27 +26,14 @@ if cotation_file and restriction_file:
     # 📊 CAPACITÉ GLOBALE
     # =========================
 
-    """
     nb_personnes_total = restriction["Matricule"].nunique()
     nb_places = cotation["nombre de places"].fillna(0).sum()
-    """
-
-    nb_personnes_total = restriction["Matricule"].nunique()
-
-    # ✅ Gestion robuste présence / absence de la colonne
-    if "nombre de places" in cotation.columns:
-        nb_places = cotation["nombre de places"].fillna(0).sum()
-        label_places = "🏭 Nb places disponibles"
-    else:
-        nb_places = cotation.shape[0]
-        label_places = "🏭 Nb postes (proxy)"
 
     st.write("### 📊 Capacité globale")
 
     col1, col2 = st.columns(2)
     col1.metric("👤 Nb personnes", nb_personnes_total)
-    col2.metric(label_places, int(nb_places))
-
+    col2.metric("🏭 Nb places disponibles", int(nb_places))
 
     # =========================
     # 🧠 MATRICE
@@ -62,7 +47,7 @@ if cotation_file and restriction_file:
     # =========================
     # 🧮 PREPA INDICATEURS
     # =========================
-    """
+
     df_calc = result.copy()
 
     if "index" in df_calc.columns:
@@ -70,33 +55,10 @@ if cotation_file and restriction_file:
 
     # personnes en lignes
     df_calc = df_calc.T.fillna(0)
-
 
     # ✅ IMPORTANT : on isole uniquement les colonnes postes
     df_postes = df_calc.copy()
 
-    """
-    
-    # personnes en lignes
-    df_calc = result.copy()
-
-    if "index" in df_calc.columns:
-        df_calc = df_calc.set_index("index")
-
-    df_calc = df_calc.T.fillna(0)
-
-    # ✅ on isole UNIQUEMENT les colonnes postes
-    df_postes = df_calc.copy()
-
-    # =========================
-    # 📊 CALCULS
-    # =========================
-
-    df_calc["nb_postes_possible"] = (df_postes == 0).sum(axis=1)
-    df_calc["nb_NOK"] = (df_postes > 0).sum(axis=1)
-
-
-    """
     # =========================
     # 📊 CALCULS CORRECTS
     # =========================
@@ -106,7 +68,6 @@ if cotation_file and restriction_file:
 
     # nb NOK = score > 0
     df_calc["nb_NOK"] = (df_postes > 0).sum(axis=1)
-    """
 
     # =========================
     # 📊 KPI
@@ -289,4 +250,3 @@ if cotation_file and restriction_file:
                 st.success("✅ OK : aucun blocage")
             else:
                 st.error(f"❌ NOK : {nb_blocages} blocage(s) détecté(s)")
-
