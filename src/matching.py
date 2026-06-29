@@ -1,5 +1,33 @@
 import pandas as pd
 
+def load_cotations_clean(file_path):
+    # Lecture fichier
+    df = pd.read_excel(file_path)
+
+    # Colonnes à utiliser pour le matching
+    matching_columns = [
+        "engin_debout",
+        "engin_frontal",
+        "engin_retract",
+        "engin_tous",
+        "membres_inf",
+        "poignet",
+        "epaule",
+        "dos",
+        "cervicales",
+    ]
+
+    # Vérification sécurité
+    missing = [col for col in matching_columns if col not in df.columns]
+    if missing:
+        raise ValueError(f"Colonnes manquantes : {missing}")
+
+    # On garde uniquement Poste + colonnes utiles
+    df_clean = df[["Poste"] + matching_columns].copy()
+
+    return df_clean
+
+
 def check_engin(poste_row, restr_row):
 
     engin_cols = ["engin_debout", "engin_retract", "engin_frontal"]
