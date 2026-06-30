@@ -146,16 +146,7 @@ if cotation_file and restriction_file:
                 st.markdown(f"🟠 **{m}**")
     else:
         st.success("✅ Aucun cas critique")
-        
-    """
-    matricules_critiques = df_critiques.index.tolist()
 
-    if len(matricules_critiques) > 0:
-        for m in matricules_critiques:
-            st.write(f"- {m}")
-    else:
-        st.write("✅ Aucun cas critique")
-    """
 
     # =========================
     # ❌ LISTE AUCUN POSTE
@@ -179,15 +170,6 @@ if cotation_file and restriction_file:
     else:
         st.success("✅ Tout le monde possède au moins un poste compatible.")
 
-    """
-    matricules_aucun_poste = df_aucun_poste.index.tolist()
-
-    if len(matricules_aucun_poste) > 0:
-        for m in matricules_aucun_poste:
-            st.write(f"- {m}")
-    else:
-        st.write("✅ Aucun matricule concerné")
-    """
 
     # =========================
     # 📥 EXPORT EXCEL
