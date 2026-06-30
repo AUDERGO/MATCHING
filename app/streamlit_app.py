@@ -130,7 +130,23 @@ if cotation_file and restriction_file:
     # =========================
 
     st.write("### 🚨 Matricules cas critiques (1 à 3 postes possibles)")
-    
+
+    matricules_critiques = df_critiques.index.tolist()
+
+    if len(matricules_critiques) > 0:
+        st.warning(
+            f"🚨 {nb_critiques} personne(s) disposent de seulement 1 à 3 postes possibles."
+        )
+        for m in matricules_critiques:
+            ligne = restriction[restriction["Matricule"] == m]
+            if not ligne.empty:
+                nom = ligne.iloc[0]["Nom"]  # adapter si le nom de la colonne est différent
+                st.markdown(f"🟠 **{m}** — {nom}")
+            else:
+                st.markdown(f"🟠 **{m}**")
+    else:
+        st.success("✅ Aucun cas critique")
+        
     """
     matricules_critiques = df_critiques.index.tolist()
 
@@ -140,35 +156,28 @@ if cotation_file and restriction_file:
     else:
         st.write("✅ Aucun cas critique")
     """
-    
-    matricules_critiques = df_critiques.index.tolist()
-
-    if len(matricules_critiques) > 0:
-
-        st.warning(
-            f"🚨 {nb_critiques} personne(s) disposent de seulement 1 à 3 postes possibles."
-        )
-
-        for m in matricules_critiques:
-
-            ligne = restriction[restriction["Matricule"] == m]
-
-            if not ligne.empty:
-                nom = ligne.iloc[0]["Nom"]  # adapter si le nom de la colonne est différent
-
-                st.markdown(f"🟠 **{m}** — {nom}")
-            else:
-                st.markdown(f"🟠 **{m}**")
-
-    else:
-        st.success("✅ Aucun cas critique")
-
 
     # =========================
     # ❌ LISTE AUCUN POSTE
     # =========================
 
     st.write("### ❌ Matricules sans aucun poste possible")
+
+    matricules_aucun_poste = df_aucun_poste.index.tolist()
+
+    if len(matricules_aucun_poste) > 0:
+        st.error(
+            f"❌ {nb_aucun_poste} personne(s) ne peuvent être affectées à aucun poste."
+        )
+        for m in matricules_aucun_poste:
+            ligne = restriction[restriction["Matricule"] == m]
+            if not ligne.empty:
+                nom = ligne.iloc[0]["Nom"]  # adapter si besoin
+                st.markdown(f"🔴 **{m}** — {nom}")
+            else:
+                st.markdown(f"🔴 **{m}**")
+    else:
+        st.success("✅ Tout le monde possède au moins un poste compatible.")
 
     """
     matricules_aucun_poste = df_aucun_poste.index.tolist()
@@ -179,28 +188,6 @@ if cotation_file and restriction_file:
     else:
         st.write("✅ Aucun matricule concerné")
     """
-
-    matricules_aucun_poste = df_aucun_poste.index.tolist()
-
-    if len(matricules_aucun_poste) > 0:
-
-        st.error(
-            f"❌ {nb_aucun_poste} personne(s) ne peuvent être affectées à aucun poste."
-        )
-
-        for m in matricules_aucun_poste:
-
-            ligne = restriction[restriction["Matricule"] == m]
-
-            if not ligne.empty:
-                nom = ligne.iloc[0]["Nom"]  # adapter si besoin
-
-                st.markdown(f"🔴 **{m}** — {nom}")
-            else:
-                st.markdown(f"🔴 **{m}**")
-
-    else:
-        st.success("✅ Tout le monde possède au moins un poste compatible.")
 
     # =========================
     # 📥 EXPORT EXCEL
