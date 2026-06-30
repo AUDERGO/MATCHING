@@ -82,12 +82,17 @@ if cotation_file and restriction_file:
         (df_calc["nb_postes_possible"] >= 1) &
         (df_calc["nb_postes_possible"] <= 3)
     ]
-
     nb_critiques = df_critiques.shape[0]
+  
+    df_aucun_poste = df_calc[
+        df_calc["nb_postes_possible"] == 0
+    ]
+    nb_aucun_poste = df_aucun_poste.shape[0]
 
     pct_all_ok = (nb_all_ok / nb_personnes) * 100
     pct_avec_nok = (nb_avec_nok / nb_personnes) * 100
     pct_critiques = (nb_critiques / nb_personnes) * 100
+    pct_aucun_poste = (nb_aucun_poste / nb_personnes) * 100
 
     # =========================
     # 📊 AFFICHAGE KPI
@@ -95,7 +100,7 @@ if cotation_file and restriction_file:
 
     st.write("### 📊 Indicateurs de Match")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     col1.metric(
         "✅ Pouvant faire tous les postes",
@@ -112,6 +117,12 @@ if cotation_file and restriction_file:
         f"{nb_critiques} ({pct_critiques:.1f}%)"
     )
 
+    col4.metric(
+        "❌ Aucun poste possible",
+        f"{nb_aucun_poste} ({pct_aucun_poste:.1f}%)"
+    )
+
+
     # =========================
     # 🚨 LISTE CRITIQUES
     # =========================
@@ -125,6 +136,20 @@ if cotation_file and restriction_file:
             st.write(f"- {m}")
     else:
         st.write("✅ Aucun cas critique")
+
+    # =========================
+    # ❌ LISTE AUCUN POSTE
+    # =========================
+
+    st.write("### ❌ Matricules sans aucun poste possible")
+
+    matricules_aucun_poste = df_aucun_poste.index.tolist()
+
+    if len(matricules_aucun_poste) > 0:
+        for m in matricules_aucun_poste:
+            st.write(f"- {m}")
+    else:
+        st.write("✅ Aucun matricule concerné")
 
     # =========================
     # 📥 EXPORT EXCEL
