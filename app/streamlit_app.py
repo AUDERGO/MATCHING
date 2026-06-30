@@ -100,7 +100,7 @@ if cotation_file and restriction_file:
 
     st.write("### 📊 Indicateurs de Match")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
 
     col1.metric(
         "✅ Pouvant faire tous les postes",
@@ -108,9 +108,11 @@ if cotation_file and restriction_file:
     )
 
     col2.metric(
-        "⚠️ Nb personnes avec ≥ 1 NOK",
+        "⚠️ Au moins 1 poste NOK",
         f"{nb_avec_nok} ({pct_avec_nok:.1f}%)"
     )
+
+    col3, col4 = st.columns(2)
 
     col3.metric(
         "🚨 Cas critiques (1 à 3 postes)",
@@ -132,8 +134,19 @@ if cotation_file and restriction_file:
     matricules_critiques = df_critiques.index.tolist()
 
     if len(matricules_critiques) > 0:
+        st.dataframe(
+            pd.DataFrame(
+                matricules_aucun_poste,
+                columns=["Matricule"]
+            ),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        """
         for m in matricules_critiques:
             st.write(f"- {m}")
+        """
     else:
         st.write("✅ Aucun cas critique")
 
